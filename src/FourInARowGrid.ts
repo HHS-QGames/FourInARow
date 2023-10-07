@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { MoveMessage } from "./Messages";
 
 async function svgLoader(url: string) {
     var template = document.createElement('template');
@@ -27,6 +29,42 @@ type Surely<T> = T extends null ? never : T;
 function surely<T>(t: T) {
     return t as Surely<T>;
 }
+
+export interface Communicator {
+    doMove(x: number, y: number, entangled: boolean): void;
+    myTurn(): boolean;
+}
+
+export class Offline implements Communicator {
+    constructor() { }
+    public doMove(x: number, y: number, entangled: boolean) { }
+    public myTurn() {
+        return true;
+    }
+};
+
+export class Online implements Communicator {
+    constructor(private imPlaying: boolean) {
+        console.log(`I am starting the game: ${imPlaying}`);
+    }
+    public flip() {
+        this.imPlaying = !this.imPlaying;
+    }
+    public doMove(x: number, y: number, entangled: boolean) {
+        console.log(`Sending move (${x}, ${y})`);
+        if (!this.imPlaying)
+            throw new Error("It's not my move to make!");
+        this.sender!({ type: "move", x, y, entangled });
+        this.imPlaying = false;
+    }
+    public myTurn() {
+        return this.imPlaying;
+    }
+    public setSender(sender: (message: MoveMessage) => Promise<void>) {
+        this.sender = sender;
+    }
+    private sender: ((message: MoveMessage) => Promise<void>) | null = null;
+};
 
 abstract class Grid<T extends Comparable<T>>
 {
@@ -82,8 +120,8 @@ abstract class Grid<T extends Comparable<T>>
         if (t != null) {
             const made = place(this.svg, this.makeSvg(t));
             made.style.position = 'absolute';
-            made.style.left = (x * this.cellSize) + 'px';
-            made.style.top = (y * this.cellSize) + 'px';
+            made.style.left = (x * this.cellSize + this.svg.getBoundingClientRect().left) + 'px';
+            made.style.top = (y * this.cellSize + this.svg.getBoundingClientRect().top) + 'px';
             made.style.width = this.cellSize + "px";
             made.style.height = this.cellSize + "px";
             made.style.pointerEvents = "none";
@@ -174,10 +212,21 @@ const Eye = {
 }
 type Eye = typeof Eye;
 
-export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> {
-    private entangle() {
-        return this.entangledCheckBox.checked;
+export interface MoveListener {
+    receiveMove(x: number, y: number, entangled: boolean): void;
+}
+
+function randomMachine(a: number) {
+    // https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
+    return () => {
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
     }
+}
+
+export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> implements MoveListener {
     private currentPlayer: "circle" | "cross" = 'circle';
     private lastMove: [number, number] | null = null;
     private checkWinner() {
@@ -221,8 +270,10 @@ export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> {
       
         return null; 
       }      
-    constructor(private readonly entangledCheckBox: HTMLInputElement) {
+    private randomMachine: () => number;
+    constructor(private readonly entangledCheckBox: HTMLInputElement, private readonly communicator: Communicator, randomSeed: number) {
         super(<any>document.getElementById('game-board'), 10);
+        this.randomMachine = randomMachine(randomSeed);
     }
     protected getSvg(t: Piece | Eye) {
         return svgLoaded[t instanceof EntangledPiece ? "entangled" : t == Eye ? "eye" : (t as SimplePiece).type];
@@ -231,38 +282,54 @@ export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> {
         return super.colHeight(x);
     }
     protected click(x: number, y: number) {
+        if (!this.communicator.myTurn() && !this.allowOnce) 
+            return;
+        
         const y2 = this.placement(x);
         if (y2 === null) return;
         const at = super.getActual(x, y);
         if (at instanceof EntangledPiece) {
-            const measurement = Math.random() < 0.5 ? "circle" : "cross";
+            const measurement = this.randomMachine() < 0.5 ? "circle" : "cross";
             super.placeActual(x, y, new SimplePiece(measurement));
             super.placeActual(at.that[0], at.that[1], new SimplePiece(measurement));
-        } else if (this.entangle()) {
+            this.lastMove = null;
+        } else if (this.entangledCheckBox.checked) {
             if (this.lastMove === null)
                 throw new Error("We should not be able to set the entangled checkbox open before a move has been made!"); 
             super.placeActual(x, y2, new EntangledPiece(this.lastMove));
             super.placeActual(this.lastMove[0], this.lastMove[1], new EntangledPiece([x, y2]));
-        } else
+            this.lastMove = null;
+        } else {
             super.placeActual(x, y2, new SimplePiece(this.currentPlayer));
-        
-        this.lastMove = [x, y2];
-        this.currentPlayer = this.currentPlayer === 'circle' ? 'cross' : 'circle'; 
-        this.entangledCheckBox.disabled = this.entangledCheckBox.checked;
-        this.entangledCheckBox.checked = false;
+            this.lastMove = [x, y2];
+        }
 
+        if (!this.allowOnce)
+            this.communicator.doMove(x, y, this.entangledCheckBox.checked);
+        this.allowOnce = false;
+
+        this.currentPlayer = this.currentPlayer === 'circle' ? 'cross' : 'circle'; 
+        this.entangledCheckBox.disabled = this.lastMove === null;
+        this.entangledCheckBox.checked = false;
+        
         const winner = this.checkWinner();
-        if (winner != null)
+        if (winner != null) {
             alert("We have a winner! 🎉 The player that won: " + winner);
+            window.location.assign("/");
+        }
     }
     protected over(x: number, y: number) {
+        if (!this.communicator.myTurn()) {
+            this.unPreview();
+            return;
+        }
         const y2 = this.placement(x);
         if (y2 === null) return;
         const at = super.getActual(x, y);
         if (at instanceof EntangledPiece) {
             super.preview(x, y, Eye);
             super.preview(at.that[0], at.that[1], Eye);
-        } else if (this.entangle()) {
+        } else if (this.entangledCheckBox.checked) {
             if (this.lastMove === null)
                 throw new Error("We should not be able to set the entangled checkbox open before a move has been made!"); 
             super.preview(x, y2, new EntangledPiece(this.lastMove));
@@ -272,6 +339,13 @@ export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> {
     }
     protected out(x: number, y: number) {
         super.unPreview();
+    }
+    private allowOnce: boolean = false;
+    public receiveMove(x: number, y: number, entangled: boolean) {
+        console.log(`Receiving move (${x}, ${y})`);
+        this.entangledCheckBox.checked = entangled;
+        this.allowOnce = true;
+        this.click(x, y);
     }
 }
 
