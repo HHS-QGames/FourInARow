@@ -75,6 +75,12 @@ abstract class Grid<T extends Comparable<T>>
     protected abstract click(x: number, y: number): void;
     protected abstract over(x: number, y: number): void;
     protected abstract out(x: number, y: number): void;
+    public clear() {
+        this.forAll((x, y) => {
+            if (this.gridSvg[x][y] != null)
+                document.body.removeChild(this.gridSvg[x][y]!);
+        });
+    }
     protected colHeight(x: number) {
         for (let y = this.gridSize - 1; y >= 0; y--)
             if (!this.grid[x][y])
@@ -269,7 +275,7 @@ export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> implemen
                     return get(row, col); 
       
         return null; 
-      }      
+    }      
     private randomMachine: () => number;
     constructor(private readonly entangledCheckBox: HTMLInputElement, private readonly communicator: Communicator, randomSeed: number) {
         super(<any>document.getElementById('game-board'), 10);
