@@ -158,7 +158,7 @@ abstract class GridWithPreview<PreviewT extends Comparable<PreviewT>, ActualT ex
     }
     protected abstract getSvg(t: PreviewT | ActualT): LoadedSvg;
     protected makePreview(t: LoadedSvg) {
-        t.style.opacity = "0.5";
+        t.style.opacity = "0.25";
     }
     protected makeSvg(t: Preview<PreviewT, ActualT>) {
         if (t.preview === null && t.actual === null) 

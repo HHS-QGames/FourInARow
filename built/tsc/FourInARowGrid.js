@@ -142,7 +142,7 @@ class GridWithPreview extends Grid {
         super(svg, gridSize);
     }
     makePreview(t) {
-        t.style.opacity = "0.5";
+        t.style.opacity = "0.25";
     }
     makeSvg(t) {
         if (t.preview === null && t.actual === null)
