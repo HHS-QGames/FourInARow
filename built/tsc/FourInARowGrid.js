@@ -88,7 +88,7 @@ class Grid {
             cell.setAttribute('height', this.cellSize + 'px');
             cell.classList.add('cell');
             svg.appendChild(cell);
-            cell.addEventListener('click', () => { this.click(x, y); this.over(x, y); });
+            cell.addEventListener('click', async () => { await this.click(x, y); this.over(x, y); });
             cell.addEventListener('mouseover', () => this.over(x, y));
             cell.addEventListener('mouseout', () => this.out(x, y));
         });
@@ -199,9 +199,69 @@ class EntangledPiece {
 const Eye = {
     equal: (eye2) => true
 };
+async function quantumRandom() {
+    async function execute(email, password, code, shots) {
+        const URL = 'https://api.quantum-inspire.com/';
+        const call = async (url, data) => {
+            const response = await fetch(URL + url, {
+                headers: {
+                    Authorization: `Basic ${btoa(`${email}:${password}`)}`,
+                    ...(data === undefined ? undefined : {
+                        "Content-Type": "application/json"
+                    }),
+                },
+                ...(data === undefined ? undefined : {
+                    body: JSON.stringify(data)
+                }),
+                method: data === undefined ? "GET" : "POST"
+            });
+            if (response.status == 401)
+                throw new Error("Wrong email or password!");
+            if (!response.ok)
+                throw new Error();
+            return await (response.json());
+        };
+        const projectCreationResponse = await call("projects/", {
+            name: "generatedProject",
+            backend_type: "https://api.quantum-inspire.com/backendtypes/1/",
+            default_number_of_shots: shots
+        });
+        const projectUrl = projectCreationResponse.url;
+        console.log(`A project was created at: ${projectUrl}`);
+        const assetCreationResponse = await call("assets/", {
+            name: "generatedAsset",
+            project: projectUrl,
+            contentType: "text/plain",
+            content: code
+        });
+        const assetUrl = assetCreationResponse.url;
+        console.log(`An asset was created at: ${assetUrl}`);
+        const jobCreationResponse = await call("jobs/", {
+            name: "generatedJob",
+            input: assetUrl,
+            backend_type: "https://api.quantum-inspire.com/backendtypes/1/",
+            number_of_shots: shots
+        });
+        const jobId = jobCreationResponse.id;
+        console.log(`A job was created with id: ${jobId}`);
+        console.log(`We now wait for completion...`);
+        let status = "WAITING";
+        while (status != "COMPLETE") {
+            await new Promise(res => setTimeout(res, 1000));
+            const jobReadResponse = await call(`jobs/${jobId}/`, undefined);
+            status = jobReadResponse.status;
+            console.log(`Current status: ${status}`);
+        }
+        const resultResponse = await call(`jobs/${jobId}/result/`, undefined);
+        console.log(`Retrieving data at: ${resultResponse.raw_data_url}`);
+        return await call(`${resultResponse.raw_data_url.substring(URL.length)}?format=json`, undefined);
+    }
+    ;
+    return (await execute('narij17727@submic.com', 'https://www.quantum-inspire.com/account/createA', 'version 1.0\nqubits 1\nprep_z q[0]\nH q[0]\nmeasure q[0]', 1))[0];
+}
 function randomMachine(a) {
     // https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
-    return () => {
+    return async () => {
         var t = a += 0x6D2B79F5;
         t = Math.imul(t ^ t >>> 15, t | 1);
         t ^= t + Math.imul(t ^ t >>> 7, t | 61);
@@ -252,7 +312,10 @@ export class FourInARowGrid extends GridWithPreview {
         super(document.getElementById('game-board'), 10);
         this.entangledCheckBox = entangledCheckBox;
         this.communicator = communicator;
-        this.randomMachine = randomMachine(randomSeed);
+        if (randomSeed == -1)
+            this.randomMachine = quantumRandom;
+        else
+            this.randomMachine = randomMachine(randomSeed);
     }
     getSvg(t) {
         return svgLoaded[t instanceof EntangledPiece ? "entangled" : t == Eye ? "eye" : t.type];
@@ -260,7 +323,7 @@ export class FourInARowGrid extends GridWithPreview {
     placement(x) {
         return super.colHeight(x);
     }
-    click(x, y) {
+    async click(x, y) {
         if (!this.communicator.myTurn() && !this.allowOnce)
             return;
         const y2 = this.placement(x);
@@ -268,7 +331,7 @@ export class FourInARowGrid extends GridWithPreview {
             return;
         const at = super.getActual(x, y);
         if (at instanceof EntangledPiece) {
-            const measurement = this.randomMachine() < 0.5 ? "circle" : "cross";
+            const measurement = (await this.randomMachine()) < 0.5 ? "circle" : "cross";
             super.placeActual(x, y, new SimplePiece(measurement));
             super.placeActual(at.that[0], at.that[1], new SimplePiece(measurement));
             this.lastMove = null;

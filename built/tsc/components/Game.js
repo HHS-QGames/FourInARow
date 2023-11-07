@@ -16,7 +16,7 @@ export function Game({ options }) {
         }
         else {
             const o = new Offline();
-            fiar = new FourInARowGrid(entangled, o, Math.random());
+            fiar = new FourInARowGrid(entangled, o, -1);
         }
         return () => {
             fiar.clear();
