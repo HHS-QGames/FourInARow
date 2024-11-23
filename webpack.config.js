@@ -1,10 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  entry: './built/tsc/index.js',
+  entry: './dist/tsc/index.js',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'built'),
+    path: path.resolve(__dirname, 'dist'),
   },
   watch: true,
 };

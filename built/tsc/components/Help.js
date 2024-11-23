@@ -1,4 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-export default function Help() {
-    return _jsxs("div", { className: "message", children: [_jsx("p", { children: "Let's play the game Four-In-A-Row with a twist." }), _jsxs("ul", { children: [_jsx("li", { children: "One plays with circles and the other with crosses" }), _jsxs("li", { children: ["Every turn you are allowed three moves:", _jsxs("ul", { children: [_jsx("li", { children: "Place a piece of your kind. " }), _jsxs("li", { children: ["Place a piece that is entangled with the opponents last placed piece. ", _jsx("br", {}), "This is not allowed if the opponent just placed an entangled piece. "] }), _jsxs("li", { children: ["Measure out an entangled pair of pieces of your choice: ", _jsx("br", {}), "the outcome will be circle-circle or cross-cross with equal probability. "] })] })] })] })] });
-}

@@ -3,7 +3,7 @@
         "jsx": "react-jsx",
         "esModuleInterop": true,
         "target": "ESNext",
-        "outDir": "built/tsc",
+        "outDir": "dist/tsc",
         "moduleResolution": "node",
         "lib": ["ESNext", "DOM"],
         "module": "ESNext",
