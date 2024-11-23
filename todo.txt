@@ -1,0 +1,6 @@
+- bundle all in a single HTML
+- bug: svg elements remain on page when navigating back to the main menu
+- feature: shade the screen when you are not allowed to make a move
+- fix measure icon
+- host online
+- credit to students
