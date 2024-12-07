@@ -7,4 +7,4 @@ import { LocalGame } from './components/LocalGame';
 import { OnlineGame1 } from './components/OnlineGame1';
 import { OnlineGame2 } from './components/OnlineGame2';
 const root = createRoot(document.getElementById('react'));
-root.render(_jsx(Router, { basename: process.env.REACT_APP_BASE_NAME, children: _jsx("div", { children: _jsxs(Routes, { children: [_jsx(Route, { path: "/", element: _jsx(Home, {}) }), _jsx(Route, { path: "/local", element: _jsx(LocalGame, {}) }), _jsx(Route, { path: "/online", element: _jsx(OnlineGame1, {}) }), _jsx(Route, { path: "/help", element: _jsx(Help, {}) }), _jsx(Route, { path: "/:opponent", element: _jsx(OnlineGame2, {}) })] }) }) }));
+root.render(_jsx(Router, { children: _jsx("div", { children: _jsxs(Routes, { children: [_jsx(Route, { path: "/", element: _jsx(Home, {}) }), _jsx(Route, { path: "/local", element: _jsx(LocalGame, {}) }), _jsx(Route, { path: "/online", element: _jsx(OnlineGame1, {}) }), _jsx(Route, { path: "/help", element: _jsx(Help, {}) }), _jsx(Route, { path: "/:opponent", element: _jsx(OnlineGame2, {}) })] }) }) }));
