@@ -1,13 +1,12 @@
 {
   "homepage": "https://hhs-qgames.github.io/FourInARow/",
   "dependencies": {
-    "live-server": "^1.2.2",
-    "peerjs": "^1.5.1",
-    "qrcode": "^1.5.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.16.0",
-    "typescript": "^5.2.2",
+    "peerjs": "^1.5.4",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "typescript": "^5.7.2",
     "uuid": "^9.0.1"
   },
   "scripts": {
@@ -18,13 +17,13 @@
     "deploy": "gh-pages -d dist/webpack"
   },
   "devDependencies": {
-    "@types/qrcode": "^1.5.2",
-    "@types/react": "^18.2.25",
-    "@types/react-dom": "^18.2.11",
-    "@types/uuid": "^9.0.5",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.14",
+    "@types/react-dom": "^18.3.2",
+    "@types/uuid": "^9.0.8",
     "copy-webpack-plugin": "^12.0.2",
     "gh-pages": "^6.2.0",
-    "webpack": "^5.88.2",
+    "webpack": "^5.97.1",
     "webpack-cli": "^5.1.4"
   },
   "private": true
