@@ -1,4 +1,4 @@
 {
     "liveServer.settings.file": "index.html",
-    "liveServer.settings.root": "/dist"
+    "liveServer.settings.root": "/dist/webpack",
 }

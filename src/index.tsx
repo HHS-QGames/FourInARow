@@ -8,7 +8,7 @@ import { OnlineGame2 } from './components/OnlineGame2';
 
 const root = createRoot(document.getElementById('react')!);
 root.render(
-    <Router basename={process.env.REACT_APP_BASE_NAME}>
+    <Router>
     <div>
       <Routes>
         <Route path="/" element={<Home/>} />

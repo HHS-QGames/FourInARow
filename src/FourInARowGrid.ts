@@ -388,7 +388,8 @@ export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> implemen
         const winner = this.checkWinner();
         if (winner != null) {
             alert("We have a winner! 🎉 The player that won: " + winner);
-            window.location.assign("/");
+            const navigate = useNavigate();
+            navigate('/');
         }
     }
     protected over(x: number, y: number) {
