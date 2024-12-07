@@ -8,7 +8,7 @@ import { OnlineGame2 } from './components/OnlineGame2';
 
 const root = createRoot(document.getElementById('react')!);
 root.render(
-    <Router>
+  <Router basename="/FourInARow">
     <div>
       <Routes>
         <Route path="/" element={<Home/>} />
@@ -19,4 +19,4 @@ root.render(
       </Routes>
     </div>
   </Router>
-  );
+);

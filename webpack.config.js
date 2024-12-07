@@ -5,7 +5,7 @@ module.exports = {
   entry: './dist/tsc/index.js',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist/webpack'),
+    path: path.resolve(__dirname, 'dist/webpack/FourInARow'),
   },
   plugins: [
     new CopyWebpackPlugin({

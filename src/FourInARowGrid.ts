@@ -388,8 +388,7 @@ export class FourInARowGrid extends GridWithPreview<Piece, Piece | Eye> implemen
         const winner = this.checkWinner();
         if (winner != null) {
             alert("We have a winner! 🎉 The player that won: " + winner);
-            const navigate = useNavigate();
-            navigate('/');
+            window.location.href = "/FourInARow";
         }
     }
     protected over(x: number, y: number) {

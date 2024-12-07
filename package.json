@@ -14,7 +14,7 @@
     "build": "tsc && webpack",
     "build:watch": "tsc -w",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist/webpack"
+    "deploy": "gh-pages -d dist/webpack/FourInARow"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5",
