@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 async function svgLoader(url) {
     var template = document.createElement('template');
     template.innerHTML = (await (await fetch(url)).text()).trim();
@@ -356,7 +357,8 @@ export class FourInARowGrid extends GridWithPreview {
         const winner = this.checkWinner();
         if (winner != null) {
             alert("We have a winner! 🎉 The player that won: " + winner);
-            window.location.assign("/");
+            const navigate = useNavigate();
+            navigate('/');
         }
     }
     over(x, y) {
